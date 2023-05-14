@@ -1,10 +1,12 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+#include "logger/logentry.h"
+#include "logger/logger.h"
 #include <filesystem>
+#include <grpc++/grpc++.h>
 #include "client.h"
-#include "../server/logger.h"
-#include "../server/server.h"
+#include "server.h"
 
 constexpr auto grpcErrorLogFile = "grpc-client.log";
 ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
@@ -19,13 +21,13 @@ ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
 
 }
 
-bool ChatClient::Register(const std::string& login, const std::string& username, const std::string& password)
+bool ChatClient::Register(const std::string& email, const std::string& username, const std::string& password)
 {
     chat::User user;
-    user.set_login(login);
+    user.set_email(email);
     user.set_username(username);
     user.set_password(password);
-    chat::ServerResponse response;
+    chat::Token response;
 
     grpc::ClientContext context;
     grpc::Status status = stub_->RegisterUser(&context, user, &response);
@@ -36,7 +38,8 @@ bool ChatClient::Register(const std::string& login, const std::string& username,
     }
     else 
     {
-        grpcLog(grpcErrorLogFile, status);
+        
+        //grpcLog(grpcErrorLogFile, status);
         return false;
     }
 }
@@ -46,7 +49,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
     chat::User user;
     user.set_username(username);
     user.set_password(password);
-    chat::ServerResponse response;
+    chat::Token response;
     
     grpc::ClientContext context;
     grpc::Status status = stub_->AuthenticateUser(&context, user, &response);
@@ -57,7 +60,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
     }
     else 
     {
-        grpcLog(grpcErrorLogFile, status);
+        //grpcLog(grpcErrorLogFile, status);
         return false;
     }
 }
@@ -68,14 +71,15 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
     message.set_sender(sender);
     message.set_receiver(receiver);
     message.set_content(content);
-    chat::SendMessageResponse response;
+    chat::Token response;
 
     grpc::ClientContext context;
     context.AddMetadata(sender, token_);
     grpc::Status status = stub_->SendMessage(&context, message, &response);
     if (!status.ok()) 
     {
-        grpcLog(grpcErrorLogFile, status);
+
+        //grpcLog(grpcErrorLogFile, status);
         return false;
     }
     return true;
@@ -83,7 +87,7 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
 
 void ChatClient::RetrieveMessageStream(const std::string& username)
 {
-    chat::ServerResponse token;
+    chat::Token token;
     token.set_message(token_);
     grpc::ClientContext context;
     std::unique_ptr<grpc::ClientReader<chat::Message>> reader(stub_->GetMessageStream(&context, token));
@@ -97,7 +101,18 @@ void ChatClient::RetrieveMessageStream(const std::string& username)
 
     grpc::Status status = reader->Finish();
     if (!status.ok()) {
-        grpcLog(grpcErrorLogFile, status);
+        //grpcLog(grpcErrorLogFile, status);
     }
     return;
+}
+
+void ChatClient::logError(const std::string& errormsg, const grpc::Status& status)
+{
+    SeverityLevel err{3};
+    LogEntry le(errormsg, err);
+    le.setAdditionalMetadata("Service", "gRPC");
+    le.setAdditionalMetadata("Error code", std::to_string(status.error_code()));
+    le.setAdditionalMetadata("Error message", status.error_message());
+    Logger log(grpcErrorLogFile);
+    log.writeLog(le);
 }

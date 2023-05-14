@@ -346,7 +346,7 @@ int SQLcon::getTokenUser(const std::string& token)
 
 void SQLcon::logError(const std::string& shortDescription)
 {
-    LogEntry logInfo(shortDescription, SeverityLevel::ERROR);
+    LogEntry logInfo(shortDescription, SeverityLevel::error);
     logInfo.setAdditionalMetadata("Service name", "SQLlite");
     logInfo.setAdditionalMetadata("Service details", sqlite3_errmsg(db));
     //logInfo.setLogger(dbLogFileName);
@@ -356,7 +356,7 @@ void SQLcon::logError(const std::string& shortDescription)
 
 void SQLcon::logInfo(const std::string& shortDescription)
 {
-    LogEntry logInfo(shortDescription, SeverityLevel::INFO);
+    LogEntry logInfo(shortDescription, SeverityLevel::info);
     logInfo.setAdditionalMetadata("Service name", "SQLlite");
     //logInfo.setLogger(dbLogFileName);
     Logger log(dbLogFileName);
