@@ -108,8 +108,7 @@ void ChatClient::RetrieveMessageStream(const std::string& username)
 
 void ChatClient::logError(const std::string& errormsg, const grpc::Status& status)
 {
-    SeverityLevel err{3};
-    LogEntry le(errormsg, err);
+    LogEntry le(errormsg, SeverityLevel::error);
     le.setAdditionalMetadata("Service", "gRPC");
     le.setAdditionalMetadata("Error code", std::to_string(status.error_code()));
     le.setAdditionalMetadata("Error message", status.error_message());
