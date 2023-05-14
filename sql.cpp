@@ -109,6 +109,7 @@ bool SQLcon::insertUser(const User& record)
         return 0;
     }
 
+    logInfo(std::string("User added : ") + record.username);
     sqlite3_finalize(stmt);
     return 1;
 }
@@ -146,6 +147,7 @@ bool SQLcon::insertMessage(const Message& record)
     // Clean up
     sqlite3_finalize(stmt);
 
+    logInfo(std::string("inserted Message sender: ") + std::to_string(record.sender) + std::string(" / reciever:") + std::to_string(record.reciever));
     return 1;
 }
 
@@ -168,13 +170,14 @@ bool SQLcon::insertToken(const std::string& token, int userID)
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        logError("Error inserting tokens record");
+        logError("Error inserting tokens record for UserID: " + std::to_string(userID));
         sqlite3_finalize(stmt);
         return 0;
     }
 
     sqlite3_finalize(stmt);
-    return false;
+    logInfo(std::string("Tokens added to userID:") + std::to_string(userID));
+    return true;
 }
 
 void SQLcon::deleteTokenByUserId(int userId)
@@ -193,11 +196,11 @@ void SQLcon::deleteTokenByUserId(int userId)
     }
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_DONE) {
-        //Logger(dbLogFileName).log(std::string("Expired tokens erased: "));
+        logInfo(std::string("Expired tokens erased for userID:") + std::to_string(userId));
         return;
     }
     else {
-        //Logger(dbLogFileName).log(std::string("Expired tokens not found: "));
+        logInfo(std::string("Expired tokens not found for userID") + std::to_string(userId));
         return;
     }
 }
@@ -212,8 +215,7 @@ std::vector<Message> SQLcon::getMessages(int userID)
         logError("Error executing query");
         sqlite3_free(err_msg);
     }
-    //Logger(dbLogFileName).log(std::string("Message query executed succesfully"));
-    // The messages vector now contains all the messages in the message table
+    logInfo(std::string("Message query executed succesfully"));
     return msg;
 }
 
@@ -242,10 +244,10 @@ std::unique_ptr<User> SQLcon::getUser(int userID)
         user->emailname = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
         user->emaildomain = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
         user->password = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
-        //Logger(dbLogFileName).log(std::string("User found by ID: ") + std::to_string(userID));
+        logInfo(std::string(std::string("User found by ID: ") + std::to_string(userID)));
         return user;
     }
-    //Logger(dbLogFileName).log(std::string("User not found by ID: ") + std::to_string(userID));
+    logInfo(std::string(std::string("User not found by ID: ") + std::to_string(userID)));
     return nullptr;
 
 }
@@ -275,10 +277,10 @@ int SQLcon::getUser(const std::string& emailname, const std::string& emaildomain
         return sqlite3_column_int(stmt, 0);
     }
     else if (rc == SQLITE_DONE) {
-        //Logger(dbLogFileName).log(std::string("No user found with email = ") + emailname + "@" + emaildomain);
+        logInfo(std::string(std::string("No user found with email = ") + emailname + "@" + emaildomain));
         return 0;
     }
-    //Logger(dbLogFileName).log(std::string("Error executing statement: ") + sqlite3_errmsg(db));
+    logError("Error executing statement");
     return 0;
 }
 
@@ -302,10 +304,10 @@ int SQLcon::getUser(const std::string& username)
         return sqlite3_column_int(stmt, 0);
     }
     else if (rc == SQLITE_DONE) {
-        //Logger(dbLogFileName).log(std::string("No user found with username = ") + username);
+        logInfo(std::string(std::string("No user found with username = ") + username));
         return 0;
     }
-    //Logger(dbLogFileName).log(std::string("Error executing statement: ") + sqlite3_errmsg(db));
+    logError("Error executing statement");
     return 0;
 }
 
@@ -328,11 +330,11 @@ int SQLcon::getTokenUser(const std::string& token)
 
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        //Logger(dbLogFileName).log(std::string("UserID token found = ") + std::to_string(sqlite3_column_int(stmt, 0)));
+        logInfo(std::string("User ID token found =") + std::to_string(sqlite3_column_int(stmt, 0)));
         return sqlite3_column_int(stmt, 0);
     }
     else if (rc == SQLITE_DONE) {
-        //Logger(dbLogFileName).log(std::string("No record found for token") + token);
+        logInfo(std::string("No record found for token") + token);
         return 0;
     }
 
@@ -347,7 +349,16 @@ void SQLcon::logError(const std::string& shortDescription)
     LogEntry logInfo(shortDescription, SeverityLevel::ERROR);
     logInfo.setAdditionalMetadata("Service name", "SQLlite");
     logInfo.setAdditionalMetadata("Service details", sqlite3_errmsg(db));
-    logInfo.setLogger(dbLogFileName);
+    //logInfo.setLogger(dbLogFileName);
+    Logger log(dbLogFileName);
+    log.writeLog(std::move(logInfo));
+}
+
+void SQLcon::logInfo(const std::string& shortDescription)
+{
+    LogEntry logInfo(shortDescription, SeverityLevel::INFO);
+    logInfo.setAdditionalMetadata("Service name", "SQLlite");
+    //logInfo.setLogger(dbLogFileName);
     Logger log(dbLogFileName);
     log.writeLog(std::move(logInfo));
 }
