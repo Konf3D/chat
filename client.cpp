@@ -38,7 +38,7 @@ bool ChatClient::Register(const std::string& email, const std::string& username,
     }
     else 
     {
-        
+        logError("Failed to register", status);
         //grpcLog(grpcErrorLogFile, status);
         return false;
     }
@@ -60,7 +60,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
     }
     else 
     {
-        //grpcLog(grpcErrorLogFile, status);
+        logError("Failed to log-in", status);
         return false;
     }
 }
@@ -79,7 +79,7 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
     if (!status.ok()) 
     {
 
-        //grpcLog(grpcErrorLogFile, status);
+        logError("Failed to send message", status);
         return false;
     }
     return true;
@@ -101,7 +101,7 @@ void ChatClient::RetrieveMessageStream(const std::string& username)
 
     grpc::Status status = reader->Finish();
     if (!status.ok()) {
-        //grpcLog(grpcErrorLogFile, status);
+        logError("Failed to load messages", status);
     }
     return;
 }
