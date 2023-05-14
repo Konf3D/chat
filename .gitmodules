@@ -1,0 +1,6 @@
+[submodule "logger"]
+	path = logger
+	url = https://github.com/Konf3D/logger.git
+[submodule "chat-grpc-submodule"]
+	path = chat-grpc-submodule
+	url = https://github.com/Konf3D/chat-grpc-submodule.git
