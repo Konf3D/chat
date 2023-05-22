@@ -48,7 +48,7 @@ ChatServer::ChatServer()
 	User usr = { request->username(),//username
 	std::string(),//name
 	std::string(),//surname
-	request->email().substr(0,separator - 1),//emailname
+	request->email().substr(0,separator),//emailname
 	request->email().substr(separator + 1),//emaildomain
 	request->password(),
 	};
@@ -96,6 +96,7 @@ ChatServer::ChatServer()
 	if(userID == 0)
 		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
 	auto messages = sql.getMessages(userID);
+
 	auto write = [&](const Message& msg)
 	{
 		chat::Message message;
@@ -104,5 +105,6 @@ ChatServer::ChatServer()
 		message.set_receiver(sql.getUser(msg.reciever)->username);
 		writer->Write(message);
 	};
+
 	return grpc::Status::OK;
 }
