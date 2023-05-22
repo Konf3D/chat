@@ -9,7 +9,7 @@ find_package(protobuf CONFIG REQUIRED)
 add_subdirectory(logger)
 add_subdirectory(chat-grpc-submodule)
 #Server programm
-add_executable(chat-net-server chat-net-serv.cpp server.cpp server.h sql.h sql.cpp ./logger/timestamp.cpp ./logger/logentry.cpp ./logger/logger.cpp)
+add_executable(chat-net-server crypto.h crypto.cpp chat-net-serv.cpp server.cpp server.h sql.h sql.cpp ./logger/timestamp.cpp ./logger/logentry.cpp ./logger/logger.cpp)
 target_compile_features(chat-net-server PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
 target_link_libraries(chat-net-server PRIVATE logging)
 target_link_libraries(chat-net-server PRIVATE proto-objects)
@@ -18,7 +18,7 @@ target_link_libraries(chat-net-server PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc
 target_link_libraries(chat-net-server PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 
 #Client programm
-add_executable(chat-net-client server.h chat-net-client.cpp client.cpp gui.cpp ./logger/logger.cpp ./logger/logentry.cpp ./logger/timestamp.cpp)
+add_executable(chat-net-client crypto.h crypto.cpp server.h chat-net-client.cpp client.cpp gui.cpp ./logger/logger.cpp ./logger/logentry.cpp ./logger/timestamp.cpp)
 target_link_libraries(chat-net-client PRIVATE logging)
 target_link_libraries(chat-net-client PRIVATE proto-objects)
 target_link_libraries(chat-net-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
