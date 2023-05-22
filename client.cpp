@@ -7,7 +7,7 @@
 #include <grpc++/grpc++.h>
 #include "client.h"
 #include "server.h"
-
+#include "crypto.h"
 constexpr auto grpcErrorLogFile = "grpc-client.log";
 ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
     : stub_(chat::ChatService::NewStub(channel))
@@ -26,7 +26,7 @@ bool ChatClient::Register(const std::string& email, const std::string& username,
     chat::User user;
     user.set_email(email);
     user.set_username(username);
-    user.set_password(password);
+    user.set_password(HashGenerator::sha256(password));
     chat::Token response;
 
     grpc::ClientContext context;
@@ -48,7 +48,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
 {
     chat::User user;
     user.set_username(username);
-    user.set_password(password);
+    user.set_password(HashGenerator::sha256(password));
     chat::Token response;
     
     grpc::ClientContext context;
@@ -74,7 +74,7 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
     chat::Token response;
 
     grpc::ClientContext context;
-    context.AddMetadata(sender, token_);
+    context.AddMetadata(sender, token_);//TODO grpc::AuthContext
     grpc::Status status = stub_->SendMessage(&context, message, &response);
     if (!status.ok()) 
     {
