@@ -105,6 +105,6 @@ ChatServer::ChatServer()
 		message.set_receiver(sql.getUser(msg.reciever)->username);
 		writer->Write(message);
 	};
-
+	std::for_each(messages.begin(), messages.end(), write);
 	return grpc::Status::OK;
 }
