@@ -24,7 +24,7 @@ ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
 bool ChatClient::Register(const std::string& email, const std::string& username, const std::string& password)
 {
     chat::User user;
-    user.set_email(email);
+    user.set_login(email);
     user.set_username(username);
     user.set_password(HashGenerator::sha256(password));
     chat::Token response;

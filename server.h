@@ -8,12 +8,14 @@
 #include <utility>
 #include "chat-grpc-submodule/chat.pb.h"
 #include "chat-grpc-submodule/chat.grpc.pb.h"
-#include "sql.h"
+//#include "sql.h"
+#include "sqlconnection.hpp"
 
 class ChatServer : public chat::ChatService::Service
 {
 private:
-    SQLcon sql;
+    //SQLcon sql;
+    ChatRepository chatDatabase;
 public:
     ChatServer();
     ~ChatServer() = default;
