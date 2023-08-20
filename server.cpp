@@ -1,8 +1,10 @@
-
+#include "server.h"
+#include "server.h"
 #pragma once
 #include <fstream>
 #include <iostream>
 #include <random>
+
 #include "server.h"
 
 constexpr auto dbFileName = "server.db";
@@ -18,6 +20,9 @@ ChatServer::ChatServer()
 	std::shared_ptr<User> usr(new User);
 	chatDatabase.getUserByLogin(request->login(),usr);
 
+	std::string one = request->login();
+	std::string two = request->password();
+
 	if (usr->login.empty() || usr->password != request->password())
 	{
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid login/password");
@@ -27,10 +32,11 @@ ChatServer::ChatServer()
 	bool condition;
 	do
 	{
-		token = generateToken();
+		token = generateToken(32);
 		condition = (chatDatabase.insertOrUpdateToken(usr->login,token) || attempt > maxTries);
 		++attempt;
 	} while (condition == false);
+	response->set_message(token);
 	if (attempt > maxTries)
 		return grpc::Status(grpc::StatusCode::INTERNAL, "Server failed");
 	return grpc::Status::OK;
@@ -51,10 +57,11 @@ ChatServer::ChatServer()
 	bool condition;
 	do
 	{
+		token = generateToken(32);
 		condition = (chatDatabase.insertOrUpdateToken(request->login(), token) || attempt > maxTries);
 		++attempt;
-		token = generateToken();
-	} while (condition = false);
+	} while (condition == false);
+	response->set_message(token);
 	if (attempt > maxTries)
 		return grpc::Status(grpc::StatusCode::INTERNAL, "Server failed");
 	return grpc::Status::OK;
@@ -94,7 +101,7 @@ ChatServer::ChatServer()
 	if(!chatDatabase.getLoginByToken(request->message(),usr) || usr.empty())
 		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
 
-	std::shared_ptr<std::vector<Message>> msgs;
+	std::shared_ptr<std::vector<Message>> msgs(new std::vector<Message>);
 	if(!chatDatabase.getMessagesByUser(usr, msgs))
 		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
 
@@ -108,5 +115,100 @@ ChatServer::ChatServer()
 		writer->Write(message);
 	};
 	std::for_each(msgs->begin(), msgs->end(), write);
+	return grpc::Status::OK;
+}
+
+::grpc::Status ChatServer::GetUsersList(::grpc::ServerContext* context, const::chat::Token* request, ::grpc::ServerWriter<::chat::Token>* writer)
+{
+	auto write = [&](const std::string& msg)
+	{
+		chat::Token message;
+		message.set_message(msg);
+		writer->Write(message);
+	};
+
+	std::string usr;
+	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+
+	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
+	if (!chatDatabase.getUserBannedList(usr, data))
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
+
+	std::for_each(data->begin(), data->end(), write);
+	return grpc::Status::OK;
+}
+
+::grpc::Status ChatServer::GetUserFriendList(::grpc::ServerContext* context, const::chat::Token* request, ::grpc::ServerWriter<::chat::Token>* writer)
+{
+	auto write = [&](const std::string& msg)
+	{
+		chat::Token message;
+		message.set_message(msg);
+		writer->Write(message);
+	};
+
+	std::string usr;
+	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+
+	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
+	if (!chatDatabase.getUserFriendList(usr, data))
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
+
+	std::for_each(data->begin(), data->end(), write);
+	return grpc::Status::OK;
+}
+
+::grpc::Status ChatServer::GetUserBannedList(::grpc::ServerContext* context, const::chat::Token* request, ::grpc::ServerWriter<::chat::Token>* writer)
+{
+	auto write = [&](const std::string& msg)
+	{
+		chat::Token message;
+		message.set_message(msg);
+		writer->Write(message);
+	};
+
+	std::string usr;
+	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+
+	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
+	if (!chatDatabase.getUserBannedList(usr, data))
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
+
+	std::for_each(data->begin(), data->end(), write);
+	return grpc::Status::OK;
+}
+
+::grpc::Status ChatServer::BlockUser(::grpc::ServerContext* context, const::chat::Token* request, ::chat::Token* response)
+{
+	auto senderUsernameTokenMeta = context->client_metadata().begin();
+	std::string user1;
+	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()), user1))
+	{
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+	}
+	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
+	if (!chatDatabase.addBlock(user1, user2))
+	{
+		return grpc::Status(grpc::StatusCode::UNKNOWN, "Server Failed");
+	}
+	return grpc::Status::OK;
+}
+
+::grpc::Status ChatServer::AddFriend(::grpc::ServerContext* context, const::chat::Token* request, ::chat::Token* response)
+{
+	auto senderUsernameTokenMeta = context->client_metadata().begin();
+	std::string user1;
+	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()), user1))
+	{
+		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+	}
+	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
+	if (!chatDatabase.addFriend(user1, user2))
+	{
+		return grpc::Status(grpc::StatusCode::UNKNOWN, "Server Failed");
+	}
 	return grpc::Status::OK;
 }

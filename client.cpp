@@ -14,9 +14,9 @@ ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
 {
 #ifdef WIN32
     /* check if database files are present*/
-    system("powershell ni usermessages.db");
+   // system("powershell ni usermessages.db");
 #elif unix
-    system("touch usermessages.db && chmod 600 usermessages.db");
+   // system("touch usermessages.db && chmod 600 usermessages.db");
 #endif
 
 }
@@ -47,7 +47,7 @@ bool ChatClient::Register(const std::string& email, const std::string& username,
 bool ChatClient::Authenticate(const std::string& username, const std::string& password)
 {
     chat::User user;
-    user.set_username(username);
+    user.set_login(username);
     user.set_password(HashGenerator::sha256(password));
     chat::Token response;
     
@@ -85,7 +85,41 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
     return true;
 }
 
-void ChatClient::RetrieveMessageStream(const std::string& username)
+bool ChatClient::BlockUser(const std::string& user)
+{
+    chat::Token token;
+    chat::Token response;
+    grpc::ClientContext context;
+    context.AddMetadata(token_, user);
+    grpc::Status status = stub_->BlockUser(&context, token, &response);
+
+    if (!status.ok())
+    {
+
+        logError("Failed to block user", status);
+        return false;
+    }
+    return true;
+}
+
+bool ChatClient::Adduser(const std::string& user)
+{
+    chat::Token token;
+    chat::Token response;
+    grpc::ClientContext context;
+    context.AddMetadata(token_, user);
+    grpc::Status status = stub_->AddFriend(&context, token, &response);
+
+    if (!status.ok())
+    {
+
+        logError("Failed to add friend", status);
+        return false;
+    }
+    return true;
+}
+
+std::vector<chat::Message> ChatClient::RetrieveMessageStream(const std::string& username)
 {
     chat::Token token;
     token.set_message(token_);
@@ -93,17 +127,47 @@ void ChatClient::RetrieveMessageStream(const std::string& username)
     std::unique_ptr<grpc::ClientReader<chat::Message>> reader(stub_->GetMessageStream(&context, token));
 
     chat::Message message;
-
-    std::ofstream messagesDBFile(dbMessagesFileName, std::ios::app);
+    std::vector<chat::Message> msgs;
+    std::ofstream messagesDBFile(dbMessagesFileName);
     while (reader->Read(&message)) {
         messagesDBFile << message.sender() << '\n' << message.receiver() << '\n' << message.content() << '\n';
+        //msgs.push_back(message);
     }
 
     grpc::Status status = reader->Finish();
     if (!status.ok()) {
         logError("Failed to load messages", status);
     }
-    return;
+    return msgs;
+}
+
+std::vector<std::string> ChatClient::RetrieveUserList(const UserType type)
+{
+    chat::Token token;
+    token.set_message(token_);
+    grpc::ClientContext context;
+    std::unique_ptr<grpc::ClientReader<chat::Token>> reader;
+    switch (type)
+    {
+    case UserType::User:
+        reader = stub_->GetUsersList(&context, token);
+    case UserType::Banned:
+        reader = stub_->GetUserBannedList(&context, token);
+    case UserType::Friend:
+        reader = stub_->GetUserFriendList(&context, token);
+    default:
+        break;
+    }
+    std::vector<std::string> response;
+    while (reader->Read(&token))
+    {
+        response.push_back(token.message());
+    }
+    grpc::Status status = reader->Finish();
+    if (!status.ok()) {
+        logError("Failed to load users", status);
+    }
+    return response;
 }
 
 void ChatClient::logError(const std::string& errormsg, const grpc::Status& status)

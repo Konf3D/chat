@@ -192,7 +192,7 @@ public:
             try
             {
                 soci::rowset<soci::row> rs = ((*connection).prepare <<
-                    "SELECT user FROM token WHERE token = :token",
+                    "SELECT login FROM token WHERE token = :token",
                     soci::use(token));
 
                 for (soci::rowset<soci::row>::const_iterator it = rs.begin(); it != rs.end(); ++it)
@@ -350,6 +350,31 @@ public:
         {
             // Handle any exceptions thrown during the insertion
             std::cerr << "Error adding friend pair: " << e.what() << std::endl;
+            return false;
+        }
+    }
+    bool addBlock(const std::string& user1, const std::string& user2)
+    {
+        try
+        {
+            // Begin a transaction
+            soci::transaction tr(*connection);
+
+            // Insert the new friend pair into the "friendlist" table
+            *connection << "INSERT INTO bannedlist (user1, user2) "
+                "VALUES (:user1, :user2)",
+                soci::use(user1), soci::use(user2);
+
+            // Commit the transaction
+            tr.commit();
+
+            std::cout << "Users blocked successfully." << std::endl;
+            return true;
+        }
+        catch (const std::exception& e)
+        {
+            // Handle any exceptions thrown during the insertion
+            std::cerr << "Error blocking users: " << e.what() << std::endl;
             return false;
         }
     }

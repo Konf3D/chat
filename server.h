@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <random>
 #include <grpc++/grpc++.h>
 #include <utility>
@@ -23,6 +24,11 @@ public:
     virtual ::grpc::Status RegisterUser(::grpc::ServerContext* context, const ::chat::User* request, ::chat::Token* response) override;
     virtual ::grpc::Status SendMessage(::grpc::ServerContext* context, const ::chat::Message* request, ::chat::Token* response) override;
     virtual ::grpc::Status GetMessageStream(::grpc::ServerContext* context, const ::chat::Token* request, ::grpc::ServerWriter< ::chat::Message>* writer) override;
+    virtual ::grpc::Status GetUsersList(::grpc::ServerContext* context, const ::chat::Token* request, ::grpc::ServerWriter< ::chat::Token>* writer) override;
+    virtual ::grpc::Status GetUserFriendList(::grpc::ServerContext* context, const ::chat::Token* request, ::grpc::ServerWriter< ::chat::Token>* writer) override;
+    virtual ::grpc::Status GetUserBannedList(::grpc::ServerContext* context, const ::chat::Token* request, ::grpc::ServerWriter< ::chat::Token>* writer) override;
+    virtual ::grpc::Status BlockUser(::grpc::ServerContext* context, const ::chat::Token* request, ::chat::Token* response);
+    virtual ::grpc::Status AddFriend(::grpc::ServerContext* context, const ::chat::Token* request, ::chat::Token* response);
 };
 
 inline std::string generateToken(std::size_t length = 64)
