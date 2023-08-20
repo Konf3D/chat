@@ -44,6 +44,11 @@ ChatListWindow::ChatListWindow(const wxString& title, AuthorizedWindow* parent)
     this->Layout();
 }
 
+std::shared_ptr<ChatClient> ChatListWindow::getClient()
+{
+    return cc;
+}
+
 void ChatListWindow::OnClose(wxCloseEvent& event)
 {
     parent->DetachChatList();

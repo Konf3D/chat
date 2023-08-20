@@ -1,17 +1,8 @@
 #include "declarewindows.h"
 
 AuthorizedWindow::AuthorizedWindow(const wxString& title, const wxSize& size, InitialWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent)
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent),cc(parent->getClient())
 {
-    /*
-    wxPanel* panel = new wxPanel(this);
-
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    wxButton* viewChatsButton = new wxButton(panel, wxID_ANY, "View Chats", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* searchUsersButton = new wxButton(panel, wxID_ANY, "Search Users", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* exitButton = new wxButton(panel, wxID_EXIT, "Exit", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-*/
     mainSizer->Add(viewChatsButton, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(searchUsersButton, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(exitButton, 0, wxALL | wxEXPAND, 10);
@@ -78,7 +69,10 @@ void AuthorizedWindow::OnClose(wxCloseEvent& event)
     parentWindow->ShowMainWindow();
     event.Skip();
 }
-
+std::shared_ptr<ChatClient> AuthorizedWindow::getClient()
+{
+    return cc;
+}
 wxBEGIN_EVENT_TABLE(AuthorizedWindow, wxFrame)
 EVT_CLOSE(AuthorizedWindow::OnClose)
 wxEND_EVENT_TABLE()

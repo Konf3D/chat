@@ -16,6 +16,7 @@ class ChatClient
 {
 public:
 	ChatClient(std::shared_ptr<grpc::Channel> channel);
+	ChatClient();
 	bool Register(const std::string& email, const std::string& username, const std::string& password);
 	bool Authenticate(const std::string& username, const std::string& password);
 	bool Message(const std::string& sender, const std::string& receiver, const std::string& content);

@@ -1,4 +1,3 @@
-
 #pragma once
 #include <string>
 #include <iostream>
@@ -10,7 +9,7 @@
 #include "chat-grpc-submodule/chat.pb.h"
 #include "chat-grpc-submodule/chat.grpc.pb.h"
 //#include "sql.h"
-#include "sqlconnection.hpp"
+#include "./sql/sqlconnection.h"
 
 class ChatServer : public chat::ChatService::Service
 {

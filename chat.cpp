@@ -6,7 +6,7 @@
 #include <sstream>
 
 ChatWindow::ChatWindow(const wxString& title, const wxString& chatName, ChatListWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500)), chatName(chatName),parent(parent) {
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500)), chatName(chatName),parent(parent),cc(parent->getClient()) {
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     chatBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,

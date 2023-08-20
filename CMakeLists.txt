@@ -9,29 +9,35 @@ find_package(SOCI CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)
 add_subdirectory(logger)
 add_subdirectory(chat-grpc-submodule)
+add_subdirectory(crypto)
+add_subdirectory(sql)
 
-#Server CONSOLE programm
-add_executable(chat-net-server sqlconnection.hpp crypto.h crypto.cpp chat-net-serv.cpp server.cpp server.h ./logger/timestamp.cpp ./logger/logentry.cpp ./logger/logger.cpp)
+#------------------#Server library
+add_library(chat-server server.cpp server.h)
+target_link_libraries(chat-server PRIVATE mycrypto mylibsql logging proto-objects)
+target_link_libraries(chat-server PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
+target_link_libraries(chat-server PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+target_compile_features(chat-server PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
+#------------------#Server CONSOLE programm
+add_executable(chat-net-server ./sql/sqlconnection.h ./crypto/crypto.h ./crypto/crypto.cpp chat-net-serv.cpp server.cpp server.h ./logger/timestamp.cpp ./logger/logentry.cpp ./logger/logger.cpp)
+target_link_libraries(chat-net-server PRIVATE chat-server mylibsql gRPC::grpc gRPC::grpc++)
 target_compile_features(chat-net-server PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
-target_link_libraries(chat-net-server PRIVATE logging)
-target_link_libraries(chat-net-server PRIVATE proto-objects)
-target_link_libraries(chat-net-server PRIVATE unofficial::sqlite3::sqlite3)
-target_link_libraries(chat-net-server PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
-target_link_libraries(chat-net-server PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
-target_link_libraries(chat-net-server PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
 
-#Client CONSOLE programm
-add_executable(chat-net-client crypto.h crypto.cpp server.h chat-net-client.cpp client.cpp gui.cpp ./logger/logger.cpp ./logger/logentry.cpp ./logger/timestamp.cpp)
-target_link_libraries(chat-net-client PRIVATE logging)
-target_link_libraries(chat-net-client PRIVATE proto-objects)
-target_link_libraries(chat-net-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
-target_link_libraries(chat-net-client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(chat-net-client PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
 
-#Client GUI program
-add_executable(chatgui authorized.cpp chat.cpp chatlist.cpp initial.cpp main.cpp searchusers.cpp signin.cpp signup.cpp)
-target_link_libraries(chatgui PRIVATE wx::core wx::base)
+#------------------#Client library
+add_library(chat-client crypto.h crypto.cpp server.h client.cpp gui.cpp ./logger/logger.cpp ./logger/logentry.cpp ./logger/timestamp.cpp)
+target_link_libraries(chat-client PRIVATE logging)
+target_link_libraries(chat-client PRIVATE proto-objects)
+target_link_libraries(chat-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+target_link_libraries(chat-client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(chat-client PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
+#------------------#Client CONSOLE application
+add_executable(chat-client-console chat-net-client.cpp)
+target_link_libraries(chat-client-console PRIVATE chat-client gRPC::grpc gRPC::grpc++)
+#------------------#Client GUI application
+add_executable(chat-client-gui authorized.cpp chat.cpp chatlist.cpp initial.cpp main.cpp searchusers.cpp signin.cpp signup.cpp)
+target_link_libraries(chat-client-gui PRIVATE wx::core wx::base chat-client)
 if(WIN32)
-    # Set subsystem to windows for a GUI application
-    set_target_properties(chatgui PROPERTIES WIN32_EXECUTABLE TRUE)
+    # Windows specific
+    set_target_properties(chat-client-gui PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()

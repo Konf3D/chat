@@ -21,6 +21,11 @@ ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
 
 }
 
+ChatClient::ChatClient()
+    :stub_(chat::ChatService::NewStub(grpc::CreateChannel("localhost:55777", grpc::InsecureChannelCredentials())))
+{
+}
+
 bool ChatClient::Register(const std::string& email, const std::string& username, const std::string& password)
 {
     chat::User user;

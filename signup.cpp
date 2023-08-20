@@ -1,21 +1,9 @@
 #include "declarewindows.h"
 
-
 SignUpWindow::SignUpWindow(const wxString& title, const wxSize& size, InitialWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent)
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent),cc(parent->getClient())
 {
-    /*
-    wxPanel* panel = new wxPanel(this);
 
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    wxTextCtrl* loginTextBox = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    wxTextCtrl* usernameTextBox = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    wxTextCtrl* passwordTextBox = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-
-    wxButton* signUpButton = new wxButton(panel, wxID_ANY, "Sign Up", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* cancelButton = new wxButton(panel, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-*/
     mainSizer->Add(loginTextBox, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(usernameTextBox, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(passwordTextBox, 0, wxALL | wxEXPAND, 10);
@@ -36,8 +24,12 @@ void SignUpWindow::OnCancelButtonClick(wxCommandEvent& event)
 
 void SignUpWindow::OnSignUpButtonClick(wxCommandEvent& event)
 {
-    // Implement sign-up logic here
-    parentWindow->ShowAuthorizedWindow();
+    if(cc->Register(loginTextBox->GetValue().ToStdString(), usernameTextBox->GetValue().ToStdString(), passwordTextBox->GetValue().ToStdString()))
+        parentWindow->ShowAuthorizedWindow();
+    else
+    {
+        wxMessageBox("Failed to sign up", "Info", wxOK | wxICON_INFORMATION);
+    }
 }
 
 void SignUpWindow::OnClose(wxCloseEvent& event)

@@ -113,3 +113,8 @@ void InitialWindow::DetachSignUp()
 {
     signUpWindow = nullptr;
 }
+
+std::shared_ptr<ChatClient> InitialWindow::getClient()
+{
+    return cc;
+}

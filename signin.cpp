@@ -1,19 +1,9 @@
 #include "declarewindows.h"
-
+#include "client.h"
 
 SignInWindow::SignInWindow(const wxString& title, const wxSize& size, InitialWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent)
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent), cc(parent->getClient())
 {
-    wxPanel* panel = new wxPanel(this);
-
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    wxTextCtrl* loginTextBox = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-    wxTextCtrl* passwordTextBox = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-
-    wxButton* signInButton = new wxButton(panel, wxID_ANY, "Sign In", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* cancelButton = new wxButton(panel, wxID_ANY, "Cancel", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-
     mainSizer->Add(loginTextBox, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(passwordTextBox, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(signInButton, 0, wxALL | wxEXPAND, 10);
@@ -33,8 +23,12 @@ void SignInWindow::OnCancelButtonClick(wxCommandEvent& event)
 
 void SignInWindow::OnSignInButtonClick(wxCommandEvent& event)
 {
-    // Implement sign-in logic here
-    parentWindow->ShowAuthorizedWindow();
+    if (cc->Authenticate(loginTextBox->GetValue().ToStdString(), passwordTextBox->GetValue().ToStdString()))
+        parentWindow->ShowAuthorizedWindow();
+    else
+    {
+        wxMessageBox("Failed to log in", "Info", wxOK | wxICON_INFORMATION);
+    }
 }
 
 void SignInWindow::OnClose(wxCloseEvent& event)
