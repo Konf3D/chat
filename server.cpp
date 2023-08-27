@@ -128,11 +128,12 @@ ChatServer::ChatServer()
 	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 
-	std::shared_ptr<std::vector<std::string>> data(new std::vector<std::string>);
+	std::vector<std::string> data;
 	if (!chatDatabase.getUserList(data))
 		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
 
-	std::for_each(data->begin(), data->end(), write);
+	std::for_each(data.begin(), data.end(), write);
+
 	return grpc::Status::OK;
 }
 

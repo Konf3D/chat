@@ -5,14 +5,19 @@
 #include <iomanip>
 #include <sstream>
 
-ChatWindow::ChatWindow(const wxString& title, const wxString& chatName, ChatListWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500)), chatName(chatName),parent(parent),cc(parent->getClient()) {
+ChatWindow::ChatWindow(const wxString& title, const wxString& chatName, AuthorizedWindow* parent)
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 500)), chatName(chatName),parent(parent),cc(parent->getClient()),myself(cc->getUser()),other(chatName) {
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     chatBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
     sizer->Add(chatBox, 1, wxEXPAND | wxALL, 5);
+    auto d = cc->RetrieveMessageStream();
+    for (auto& data : d)
+    {
 
+        chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", data.date(), data.sender(), data.content()));
+    }
     messageEntry = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxTE_PROCESS_ENTER);
     messageEntry->Bind(wxEVT_TEXT_ENTER, &ChatWindow::OnSendMessage, this);
@@ -42,10 +47,10 @@ std::string ChatWindow::GetTimestamp() {
 
 
 void ChatWindow::OnSendMessage(wxCommandEvent& event) {
-    wxString message = messageEntry->GetValue();
-    if (!message.IsEmpty()) {
-        std::string timestamp = GetTimestamp();
-        chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", timestamp, "You", message));
-        messageEntry->Clear();
+    if (!messageEntry->GetValue().IsEmpty()) {
+        if(cc->Message(myself, other, messageEntry->GetValue().ToStdString()))
+        chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", GetTimestamp(), myself, messageEntry->GetValue().ToStdString()));
+        else
+            wxMessageBox("Failed to send message", "Info", wxOK | wxICON_INFORMATION);
     }
 }

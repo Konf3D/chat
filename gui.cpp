@@ -42,7 +42,7 @@ void ChatGUI::trySignIn()
     if (client_.Authenticate(username, password))
     {
         user_ = std::move(username);
-        client_.RetrieveMessageStream(user_);
+        client_.RetrieveMessageStream();
         logged();
     }
     else
@@ -89,7 +89,7 @@ void ChatGUI::trySignUp()
             return;
         }
         user_ = std::move(username);
-        client_.RetrieveMessageStream(user_);
+        client_.RetrieveMessageStream();
         logged();
     }
     return;
@@ -112,7 +112,7 @@ void ChatGUI::logged()
         std::string reciever;
         std::getline(std::cin, reciever);
         client_.Message(user_, reciever, message);
-        client_.RetrieveMessageStream(user_);
+        client_.RetrieveMessageStream();
         break;
     }
     case '2':
@@ -144,7 +144,7 @@ void ChatGUI::logged()
                     std::cout << "You sent user " << readbuff[1] << ":" << readbuff[2] << '\n';
             }
         }
-        client_.RetrieveMessageStream(user_);
+        client_.RetrieveMessageStream();
     }
     break;
     case '3':

@@ -2,7 +2,7 @@
 
 
 ChatListWindow::ChatListWindow(const wxString& title, AuthorizedWindow* parent)
-    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 300)),parent(parent) {
+    : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500, 300)),parent(parent),cc(parent->getClient()) {
 
     chatList = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
         wxLC_REPORT | wxLC_SINGLE_SEL);
@@ -11,16 +11,28 @@ ChatListWindow::ChatListWindow(const wxString& title, AuthorizedWindow* parent)
     chatList->InsertColumn(0, "Name");
     chatList->InsertColumn(1, "Last Message");
     chatList->InsertColumn(2, "Timestamp"); // New column for timestamp
-
+    msgs = std::make_shared<std::vector<chat::Message>>(cc->RetrieveMessageStream());
+    std::unordered_map<std::string, Message> preview;
+    for (auto& data : *msgs)
+    {
+        std::string previewUser = data.sender() == cc->getUser() ? data.sender() : data.receiver();
+        Message msg;
+        msg.content = data.content();
+        msg.sender = data.sender();
+        msg.receiver = data.receiver();
+        msg.time = data.date();
+        preview.insert(std::make_pair(previewUser, msg));
+    }
     // Set column widths
     chatList->SetColumnWidth(0, 120);
     chatList->SetColumnWidth(1, 300);
     chatList->SetColumnWidth(2, 120); // Adjust the width for the timestamp column
 
     // Add some sample data
-    AddChat("User1", "Hello there!", "2 minutes ago");
-    AddChat("User2", "How are you?", "5 minutes ago");
-    AddChat("User3", "Chat preview example", "10 minutes ago");
+    for (auto& data : preview)
+    {
+        AddChat(data.first, data.second.content, data.second.time);
+    }
 
     // Bind the event to the handler function
     chatList->Bind(wxEVT_LIST_ITEM_ACTIVATED, &ChatListWindow::OnChatItemClick, this);
@@ -67,7 +79,7 @@ void ChatListWindow::OnChatItemClick(wxListEvent & event) {
     wxString name = chatList->GetItemText(selectedIdx);
 
     // Open the chat window for the selected chat
-    ChatWindow* chatWindow = new ChatWindow("Chat with " + name, name, this);
+    ChatWindow* chatWindow = new ChatWindow("Chat with " + name, name, parent);
     chatWindow->Show(true);
 }
 

@@ -11,7 +11,6 @@ add_subdirectory(logger)
 add_subdirectory(chat-grpc-submodule)
 add_subdirectory(crypto)
 add_subdirectory(sql)
-
 #------------------#Server library
 add_library(chat-server server.cpp server.h)
 target_link_libraries(chat-server PRIVATE mycrypto mylibsql logging proto-objects)
@@ -19,18 +18,18 @@ target_link_libraries(chat-server PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_a
 target_link_libraries(chat-server PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 target_compile_features(chat-server PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
 #------------------#Server CONSOLE programm
-add_executable(chat-net-server ./sql/sqlconnection.h ./crypto/crypto.h ./crypto/crypto.cpp chat-net-serv.cpp server.cpp server.h ./logger/timestamp.cpp ./logger/logentry.cpp ./logger/logger.cpp)
+add_executable(chat-net-server  chat-net-serv.cpp)
 target_link_libraries(chat-net-server PRIVATE chat-server mylibsql gRPC::grpc gRPC::grpc++)
 target_compile_features(chat-net-server PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
 
 
 #------------------#Client library
-add_library(chat-client crypto.h crypto.cpp server.h client.cpp gui.cpp ./logger/logger.cpp ./logger/logentry.cpp ./logger/timestamp.cpp)
+add_library(chat-client crypto.h crypto.cpp server.h client.cpp gui.cpp)
 target_link_libraries(chat-client PRIVATE logging)
 target_link_libraries(chat-client PRIVATE proto-objects)
 target_link_libraries(chat-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
-target_link_libraries(chat-client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(chat-client PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
+#target_link_libraries(chat-client PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+#target_link_libraries(chat-client PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
 #------------------#Client CONSOLE application
 add_executable(chat-client-console chat-net-client.cpp)
 target_link_libraries(chat-client-console PRIVATE chat-client gRPC::grpc gRPC::grpc++)

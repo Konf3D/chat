@@ -22,11 +22,13 @@ public:
 	bool Message(const std::string& sender, const std::string& receiver, const std::string& content);
 	bool BlockUser(const std::string& user);
 	bool Adduser(const std::string & user);
-	std::vector<chat::Message> RetrieveMessageStream(const std::string& username);
+	std::vector<chat::Message> RetrieveMessageStream();
 	std::vector<std::string> RetrieveUserList(const UserType type = UserType::User);
+	std::string getUser();
 private:
 	void logError(const std::string& errormsg, const grpc::Status& status);
 private:
 	std::unique_ptr<chat::ChatService::Stub> stub_;
 	std::string token_;
+	std::string user_;
 };

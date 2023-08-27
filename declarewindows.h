@@ -123,14 +123,14 @@ private:
 ///
 class ChatWindow : public wxFrame {
 public:
-    ChatWindow(const wxString& title, const wxString& chatName, ChatListWindow* parent);
+    ChatWindow(const wxString& title, const wxString& chatName, AuthorizedWindow* parent);
 
 private:
     std::shared_ptr<ChatClient> cc;
-    std::vector<Message> messages;
-    std::string me,other,token;
+    std::shared_ptr<std::vector<chat::Message>> msgs;
+    std::string myself,other;
     //Member objects
-    ChatListWindow* parent;
+    AuthorizedWindow* parent;
     wxString chatName;
     wxTextCtrl* chatBox;
     wxTextCtrl* messageEntry;
@@ -146,8 +146,29 @@ public:
 private:
     void OnClose(wxCloseEvent& event);
     AuthorizedWindow* parentWindow;
+    struct UserData {
+        wxString username;
+        wxString status;
+    };
 
+    wxBoxSizer* mainSizer; // Main sizer to manage layout
+    wxTextCtrl* searchBox;
+    wxListCtrl* userListCtrl;
+    wxButton* banButton;
+    std::vector<UserData> allUsers; // List of all users
+    std::vector<UserData> filteredUsers; // List of filtered users
+private:
+
+    void PopulateUserList();
+    void UpdateUserList();
+    void AddUserToList(const wxString& username, const wxString& status);
+    void UpdateFilteredUserList(const wxString& filter);
+
+    void OnBanButtonClick(wxCommandEvent& event);
+    void OnSearchBoxTextChanged(wxCommandEvent& event);
+    void OnChatItemClick(wxListEvent& event);
     wxDECLARE_EVENT_TABLE();
+
 };
 
 class ChatListWindow : public wxFrame {
@@ -156,6 +177,7 @@ public:
     std::shared_ptr<ChatClient> getClient();
 private:
     std::shared_ptr<ChatClient> cc;
+    std::shared_ptr<std::vector<chat::Message>> msgs;
     //Member objects
     wxListCtrl* chatList;
     wxButton* blockButton;

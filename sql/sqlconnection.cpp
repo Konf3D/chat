@@ -185,8 +185,6 @@ bool UserRepository::getLoginByToken(const std::string& token, std::string& resp
 }
 bool UserRepository::getUserByLogin(const std::string& login, std::shared_ptr<User> response)
 {
-    if (response = nullptr)
-        response = std::make_shared<User>();
     try
     {
         soci::rowset<soci::row> rs = ((*connection).prepare <<
@@ -277,20 +275,18 @@ bool UserRepository::getUserBannedList(const std::string& userLogin, std::shared
         return false; // Query failed
     }
 }
-bool UserRepository::getUserList(std::shared_ptr<std::vector<std::string>> response)
+bool UserRepository::getUserList(std::vector<std::string>& response)
 {
     try
     {
 
         soci::rowset<soci::row> rs1 = ((*connection).prepare <<
-            "SELECT login FROM user WHERE user2");
-        std::vector<std::string> set;
+            "SELECT login FROM user");
         for (soci::rowset<soci::row>::const_iterator it = rs1.begin(); it != rs1.end(); ++it)
         {
             soci::row const& row = *it;
-            set.push_back(row.get<std::string>(0));
+            response.push_back(row.get<std::string>(0));
         }
-        response = std::make_shared<std::vector<std::string>>(set);
         return true;
     }
     catch (const std::exception& e)

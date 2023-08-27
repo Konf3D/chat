@@ -39,6 +39,7 @@ bool ChatClient::Register(const std::string& email, const std::string& username,
     if (status.ok()) 
     {
         token_ = response.message();
+        this->user_ = email;
         return true;
     }
     else 
@@ -61,6 +62,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
     if (status.ok()) 
     {
         token_ = response.message();
+        this->user_ = username;
         return true;
     }
     else 
@@ -124,8 +126,9 @@ bool ChatClient::Adduser(const std::string& user)
     return true;
 }
 
-std::vector<chat::Message> ChatClient::RetrieveMessageStream(const std::string& username)
+std::vector<chat::Message> ChatClient::RetrieveMessageStream()
 {
+    //std::string username = user_;
     chat::Token token;
     token.set_message(token_);
     grpc::ClientContext context;
@@ -136,7 +139,7 @@ std::vector<chat::Message> ChatClient::RetrieveMessageStream(const std::string& 
     std::ofstream messagesDBFile(dbMessagesFileName);
     while (reader->Read(&message)) {
         messagesDBFile << message.sender() << '\n' << message.receiver() << '\n' << message.content() << '\n';
-        //msgs.push_back(message);
+        msgs.push_back(message);
     }
 
     grpc::Status status = reader->Finish();
@@ -156,10 +159,13 @@ std::vector<std::string> ChatClient::RetrieveUserList(const UserType type)
     {
     case UserType::User:
         reader = stub_->GetUsersList(&context, token);
+        break;
     case UserType::Banned:
         reader = stub_->GetUserBannedList(&context, token);
+        break;
     case UserType::Friend:
         reader = stub_->GetUserFriendList(&context, token);
+        break;
     default:
         break;
     }
@@ -173,6 +179,11 @@ std::vector<std::string> ChatClient::RetrieveUserList(const UserType type)
         logError("Failed to load users", status);
     }
     return response;
+}
+
+std::string ChatClient::getUser()
+{
+    return user_;
 }
 
 void ChatClient::logError(const std::string& errormsg, const grpc::Status& status)
