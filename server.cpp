@@ -17,9 +17,8 @@ ChatServer::ChatServer()
 {
 	std::shared_ptr<User> usr(new User);
 	chatDatabase.getUserByLogin(request->login(),usr);
-
-	std::string one = request->login();
-	std::string two = request->password();
+	if (usr->status == "banned")
+		return grpc::Status(grpc::StatusCode::PERMISSION_DENIED, "Banned by admin");
 
 	if (usr->login.empty() || usr->password != request->password())
 	{
@@ -71,7 +70,7 @@ ChatServer::ChatServer()
 	auto senderUsernameTokenMeta = context->client_metadata().begin();
 	std::shared_ptr<User> usr(new User);
 	if(!chatDatabase.getUserByLogin(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()),usr))
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Sender credentials invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Sender credentials invalid");
 	std::string token;
 
 	if (!chatDatabase.getTokenByLogin(usr->login,token) 
@@ -97,7 +96,7 @@ ChatServer::ChatServer()
 {
 	std::string usr;
 	if(!chatDatabase.getLoginByToken(request->message(),usr) || usr.empty())
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 
 	std::shared_ptr<std::vector<Message>> msgs(new std::vector<Message>);
 	if(!chatDatabase.getMessagesByUser(usr, msgs))
@@ -127,10 +126,10 @@ ChatServer::ChatServer()
 
 	std::string usr;
 	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 
-	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
-	if (!chatDatabase.getUserBannedList(usr, data))
+	std::shared_ptr<std::vector<std::string>> data(new std::vector<std::string>);
+	if (!chatDatabase.getUserList(data))
 		return grpc::Status(grpc::StatusCode::NOT_FOUND, "Messages not found");
 
 	std::for_each(data->begin(), data->end(), write);
@@ -148,7 +147,7 @@ ChatServer::ChatServer()
 
 	std::string usr;
 	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 
 	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
 	if (!chatDatabase.getUserFriendList(usr, data))
@@ -169,7 +168,7 @@ ChatServer::ChatServer()
 
 	std::string usr;
 	if (!chatDatabase.getLoginByToken(request->message(), usr) || usr.empty())
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 
 	std::shared_ptr<std::unordered_set<std::string>> data(new std::unordered_set<std::string>);
 	if (!chatDatabase.getUserBannedList(usr, data))
@@ -185,7 +184,7 @@ ChatServer::ChatServer()
 	std::string user1;
 	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()), user1))
 	{
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 	}
 	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
 	if (!chatDatabase.addBlock(user1, user2))
@@ -201,7 +200,7 @@ ChatServer::ChatServer()
 	std::string user1;
 	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()), user1))
 	{
-		return grpc::Status(grpc::StatusCode::NOT_FOUND, "User access token invalid");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
 	}
 	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
 	if (!chatDatabase.addFriend(user1, user2))

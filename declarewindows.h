@@ -127,6 +127,8 @@ public:
 
 private:
     std::shared_ptr<ChatClient> cc;
+    std::vector<Message> messages;
+    std::string me,other,token;
     //Member objects
     ChatListWindow* parent;
     wxString chatName;

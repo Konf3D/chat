@@ -28,7 +28,7 @@ public:
 };
 
 class UserRepository
-{
+{//GOD OBJECT
 private:
     std::shared_ptr<soci::session> connection;
 private:
@@ -43,9 +43,11 @@ public:
     bool getUserByLogin(const std::string& login, std::shared_ptr<User> response);
     bool getUserFriendList(const std::string& userLogin, std::shared_ptr<std::unordered_set<std::string>> response);
     bool getUserBannedList(const std::string& userLogin, std::shared_ptr<std::unordered_set<std::string>> response);
+    bool getUserList(std::shared_ptr<std::vector<std::string>> response);
     bool addUser(const std::string& login, const std::string& username, const std::string& password, const std::string& status = "active");
     bool addFriend(const std::string& user1, const std::string& user2);
     bool addBlock(const std::string& user1, const std::string& user2);
+    bool addUserBan(const std::string& login);
 public:
     UserRepository(std::shared_ptr<soci::session> conn);
 };

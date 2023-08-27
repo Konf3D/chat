@@ -1,4 +1,5 @@
 #include "sqlconnection.h"
+#include "sqlconnection.h"
 
 SqlConnection::SqlConnection(const std::string& databaseFile) : sql(std::make_shared<soci::session>(soci::sqlite3, databaseFile))
 {
@@ -184,6 +185,8 @@ bool UserRepository::getLoginByToken(const std::string& token, std::string& resp
 }
 bool UserRepository::getUserByLogin(const std::string& login, std::shared_ptr<User> response)
 {
+    if (response = nullptr)
+        response = std::make_shared<User>();
     try
     {
         soci::rowset<soci::row> rs = ((*connection).prepare <<
@@ -230,7 +233,7 @@ bool UserRepository::getUserFriendList(const std::string& userLogin, std::shared
             soci::row const& row = *it;
             set.insert(row.get<std::string>(0));
         }
-        *response = set;
+        response = std::make_unique<std::unordered_set<std::string>>(set);
         // Check if any friends were retrieved
         return true;
     }
@@ -263,7 +266,7 @@ bool UserRepository::getUserBannedList(const std::string& userLogin, std::shared
             soci::row const& row = *it;
             set.insert(row.get<std::string>(0));
         }
-        *response = set;
+        response = std::make_unique<std::unordered_set<std::string>>(set);
         // Check if any friends were retrieved
         return true;
     }
@@ -272,6 +275,57 @@ bool UserRepository::getUserBannedList(const std::string& userLogin, std::shared
         // Handle any exceptions thrown during the queries
         std::cerr << "Error retrieving user's friend list: " << e.what() << std::endl;
         return false; // Query failed
+    }
+}
+bool UserRepository::getUserList(std::shared_ptr<std::vector<std::string>> response)
+{
+    try
+    {
+
+        soci::rowset<soci::row> rs1 = ((*connection).prepare <<
+            "SELECT login FROM user WHERE user2");
+        std::vector<std::string> set;
+        for (soci::rowset<soci::row>::const_iterator it = rs1.begin(); it != rs1.end(); ++it)
+        {
+            soci::row const& row = *it;
+            set.push_back(row.get<std::string>(0));
+        }
+        response = std::make_shared<std::vector<std::string>>(set);
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        // Handle any exceptions thrown during the queries
+        std::cerr << "Error retrieving user's friend list: " << e.what() << std::endl;
+        return false; // Query failed
+    }
+}
+bool UserRepository::addUserBan(const std::string& login)
+{
+    try
+    {
+        // Check if the login already exists in the "tokens" table
+        int count = 0;
+        *connection << "SELECT COUNT(*) FROM token WHERE login = :login", soci::use(login), soci::into(count);
+
+        if (count == 0)
+        {
+            // The login does not exist, insert a new record
+            return false;
+        }
+        else
+        {
+            // The login exists, update the existing record
+            *connection << "UPDATE user SET status = banned WHERE login = :login",
+                soci::use(login);
+        }
+
+        return true; // Insert or update successful
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error inserting or updating token: " << e.what() << std::endl;
+        return false; // Insert or update failed
     }
 }
 bool UserRepository::addUser(const std::string& login, const std::string& username, const std::string& password, const std::string& status)
