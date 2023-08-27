@@ -3,15 +3,6 @@
 InitialWindow::InitialWindow(const wxString& title, const wxSize& size)
     : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), signUpWindow(nullptr), signInWindow(nullptr), authorizedWindow(nullptr)
 {
-    /*
-    wxPanel* panel = new wxPanel(this);
-
-    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-
-    wxButton* signInButton = new wxButton(panel, wxID_ANY, "Sign In", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* signUpButton = new wxButton(panel, wxID_ANY, "Sign Up", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    wxButton* exitButton = new wxButton(panel, wxID_EXIT, "Exit", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-*/
     mainSizer->Add(signInButton, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(signUpButton, 0, wxALL | wxEXPAND, 10);
     mainSizer->Add(exitButton, 0, wxALL | wxEXPAND, 10);
@@ -118,3 +109,16 @@ std::shared_ptr<ChatClient> InitialWindow::getClient()
 {
     return cc;
 }
+
+class MyApp : public wxApp
+{
+public:
+    virtual bool OnInit()
+    {
+        InitialWindow* frame = new InitialWindow("Welcome", wxSize(250, 150));
+        frame->Show(true);
+        return true;
+    }
+};
+
+wxIMPLEMENT_APP(MyApp);

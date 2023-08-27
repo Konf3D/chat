@@ -54,6 +54,8 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
 {
     chat::User user;
     user.set_login(username);
+    auto kek = HashGenerator::sha256(password);
+
     user.set_password(HashGenerator::sha256(password));
     chat::Token response;
     
@@ -95,9 +97,10 @@ bool ChatClient::Message(const std::string& sender, const std::string& receiver,
 bool ChatClient::BlockUser(const std::string& user)
 {
     chat::Token token;
+    token.set_message(user);
     chat::Token response;
     grpc::ClientContext context;
-    context.AddMetadata(token_, user);
+    context.AddMetadata(user_, token_);
     grpc::Status status = stub_->BlockUser(&context, token, &response);
 
     if (!status.ok())

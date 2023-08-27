@@ -1,6 +1,6 @@
 #include "sqlconnection.h"
 #include "sqlconnection.h"
-
+#include <memory>
 SqlConnection::SqlConnection(const std::string& databaseFile) : sql(std::make_shared<soci::session>(soci::sqlite3, databaseFile))
 {
     // Optionally, you can specify other database options here
@@ -23,7 +23,6 @@ bool UserRepository::createFriendTable()
             "user1 TEXT REFERENCES user(login),"
             "user2 TEXT REFERENCES user(login),"
             "PRIMARY KEY(user1, user2))";
-
         // Commit the transaction
         tr.commit();
         return true;
@@ -75,6 +74,7 @@ bool UserRepository::createUserTable()
 
         // Commit the transaction
         tr.commit();
+        addUser("localhost-admin", "localhost-admin", "54d5cb2d332dbdb4850293caae4559ce88b65163f1ea5d4e4b3ac49d772ded14", "admin");
         return true;
     }
     catch (const std::exception& e)
@@ -300,28 +300,22 @@ bool UserRepository::addUserBan(const std::string& login)
 {
     try
     {
-        // Check if the login already exists in the "tokens" table
-        int count = 0;
-        *connection << "SELECT COUNT(*) FROM token WHERE login = :login", soci::use(login), soci::into(count);
+        // Begin a transaction
+        soci::transaction tr(*connection);
 
-        if (count == 0)
-        {
-            // The login does not exist, insert a new record
-            return false;
-        }
-        else
-        {
-            // The login exists, update the existing record
-            *connection << "UPDATE user SET status = banned WHERE login = :login",
-                soci::use(login);
-        }
+        // Update the status column for the specified user login
+        *connection << "UPDATE user SET status = 'banned' WHERE login = :login",
+            soci::use(login);
 
-        return true; // Insert or update successful
+        // Commit the transaction
+        tr.commit();
+        return true;
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error inserting or updating token: " << e.what() << std::endl;
-        return false; // Insert or update failed
+        // Handle any exceptions thrown during the update
+        std::cerr << "Error banning user: " << e.what() << std::endl;
+        return false;
     }
 }
 bool UserRepository::addUser(const std::string& login, const std::string& username, const std::string& password, const std::string& status)

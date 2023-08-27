@@ -1,4 +1,3 @@
-#pragma once
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -183,9 +182,14 @@ ChatServer::ChatServer()
 {
 	auto senderUsernameTokenMeta = context->client_metadata().begin();
 	std::string user1;
-	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->first.begin(), senderUsernameTokenMeta->first.end()), user1))
+	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end()), user1))
 	{
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
+	}
+	if (user1 == "localhost-admin")
+	{
+		auto userlist = chatDatabase.addUserBan(request->message());
+		return grpc::Status::OK;
 	}
 	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
 	if (!chatDatabase.addBlock(user1, user2))
