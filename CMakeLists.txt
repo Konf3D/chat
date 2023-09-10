@@ -22,7 +22,7 @@ add_executable(chat-server-console  chat-net-serv.cpp)
 target_link_libraries(chat-server-console PRIVATE chat-server gRPC::grpc++)
 target_compile_features(chat-server-console PRIVATE cxx_std_17) #https://stackoverflow.com/questions/71991758/c-filesystem-lib-not-importing
 #------------------#Server gui programm
-add_executable(chat-server-gui  adminpanel.cpp)
+add_executable(chat-server-gui  "wxadminpanel.cpp")
 target_link_libraries(chat-server-gui PRIVATE chat-server chat-client wx::core wx::base gRPC::grpc++)
 
 #------------------#Client library
@@ -37,7 +37,7 @@ target_link_libraries(chat-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_a
 add_executable(chat-client-console chat-net-client.cpp gui.h gui.cpp)
 target_link_libraries(chat-client-console PRIVATE chat-client gRPC::grpc gRPC::grpc++)
 #------------------#Client GUI application
-add_executable(chat-client-gui authorized.cpp chat.cpp chatlist.cpp initial.cpp searchusers.cpp signin.cpp signup.cpp)
+add_executable(chat-client-gui "wxauthorized.cpp" "wxchat.cpp" "wxchatlist.cpp" "wxinitial.cpp" "wxsearchusers.cpp" "wxsignin.cpp" "wxsignup.cpp")
 target_link_libraries(chat-client-gui PRIVATE wx::core wx::base chat-client)
 if(WIN32)
     # Windows specific

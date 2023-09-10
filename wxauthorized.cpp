@@ -1,4 +1,4 @@
-#include "declarewindows.h"
+#include "wxdeclarewindows.h"
 
 AuthorizedWindow::AuthorizedWindow(const wxString& title, const wxSize& size, InitialWindow* parent)
     : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), parentWindow(parent),cc(parent->getClient())

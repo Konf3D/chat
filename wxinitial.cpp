@@ -1,4 +1,4 @@
-#include "declarewindows.h"
+#include "wxdeclarewindows.h"
 
 InitialWindow::InitialWindow(const wxString& title, const wxSize& size)
     : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, size), signUpWindow(nullptr), signInWindow(nullptr), authorizedWindow(nullptr)

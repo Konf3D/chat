@@ -1,4 +1,4 @@
-#include "declarewindows.h"
+#include "wxdeclarewindows.h"
 #include "client.h"
 
 SignInWindow::SignInWindow(const wxString& title, const wxSize& size, InitialWindow* parent)

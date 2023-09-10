@@ -1,4 +1,4 @@
-#include "declarewindows.h"
+#include "wxdeclarewindows.h"
 
 #include <wx/listctrl.h>
 #include <wx/textctrl.h>

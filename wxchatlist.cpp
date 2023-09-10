@@ -1,4 +1,4 @@
-#include "declarewindows.h"
+#include "wxdeclarewindows.h"
 
 
 ChatListWindow::ChatListWindow(const wxString& title, AuthorizedWindow* parent)
