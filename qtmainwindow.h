@@ -22,7 +22,6 @@ private slots:
     void onSignInClicked();
     void onChildWindowClosed();
     void onAuthorizedSignal();
-
 private:
     QPushButton *signUpButton;
     QPushButton *signInButton;

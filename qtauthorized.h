@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QSplitter>
+#include <unordered_map>
 #include "qtmainwindow.h"
 
 class AuthorizedWindow : public QWidget
@@ -22,11 +23,12 @@ public:
 
 private:
     void setupTableWidget();
-    void populateTableData();
     void onSendButtonClicked();
 
 private slots:
     void onTableRowDoubleClicked(int row, int column);
+    void populateTableData();
+    void newReciever();
 
 private:
     QTableWidget *tableWidget;
@@ -46,5 +48,8 @@ private:
 
     QWidget *centralWidget; 
     std::shared_ptr<ChatClient> cc;
+    QTimer* timer;
+    std::string currentOtherUser;
+    std::unique_ptr <std::vector<Message>> msgs;
 };
 #endif // AUTHORIZED_H

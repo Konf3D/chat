@@ -12,16 +12,16 @@ SignInWindow::SignInWindow(QWidget* parent, std::shared_ptr<ChatClient> cc)
 
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    QLineEdit* usernameLineEdit = new QLineEdit(this);
-    usernameLineEdit->setPlaceholderText("Login");
+    loginLineEdit = new QLineEdit(this);
+    loginLineEdit->setPlaceholderText("Login");
 
-    QLineEdit* passwordLineEdit = new QLineEdit(this);
+    passwordLineEdit = new QLineEdit(this);
     passwordLineEdit->setPlaceholderText("Password");
     passwordLineEdit->setEchoMode(QLineEdit::Password);
 
     QPushButton* signinButton = new QPushButton("Sign In", this);
 
-    layout->addWidget(usernameLineEdit);
+    layout->addWidget(loginLineEdit);
     layout->addWidget(passwordLineEdit);
     layout->addWidget(signinButton);
 
@@ -36,9 +36,21 @@ void SignInWindow::closeEvent(QCloseEvent* event)
 }
 void SignInWindow::onSignInCompleted()
 {
-    if(true)
+    if(cc->Authenticate(loginLineEdit->text().toStdString(), passwordLineEdit->text().toStdString()))
     {
         emit authorized();
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Authorization Failed");
+        msgBox.setText("Sorry, authorization has failed.");
+        msgBox.setIcon(QMessageBox::Warning); // Display an error icon
+        msgBox.addButton(QMessageBox::Ok);     // Add an "OK" button
+
+        // Show the message box and wait for the user to click "OK"
+        msgBox.exec();
+        return;
     }
     close();
 }

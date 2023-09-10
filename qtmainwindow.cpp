@@ -4,7 +4,7 @@
 #include "qtauthorized.h"
 
 MainWindow::MainWindow()
-    :currentChild(nullptr)
+    :currentChild(nullptr),cc(new ChatClient)
 {
     setWindowTitle("Main Window");
     setFixedSize(300, 300);

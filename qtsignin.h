@@ -1,7 +1,8 @@
 #ifndef SIGNIN_H
 #define SIGNIN_H
 
-#include <QWidget>
+#include <qwidget.h>
+#include <qlineedit.h>
 #include "qtmainwindow.h"
 class SignInWindow : public QWidget
 {
@@ -18,6 +19,9 @@ private slots:
 
 private:
     std::shared_ptr<ChatClient> cc;
+    QLineEdit* loginLineEdit = nullptr;
+
+    QLineEdit* passwordLineEdit = nullptr;
 };
 
 #endif // SIGNIN_H
