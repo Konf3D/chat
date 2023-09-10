@@ -106,7 +106,7 @@ ChatServer::ChatServer()
 		chat::Message message;
 		message.set_content(msg.content);
 		message.set_sender(msg.sender);
-		message.set_receiver(msg.content);
+		message.set_receiver(msg.receiver);
 		message.set_date(msg.time);
 		writer->Write(message);
 	};
