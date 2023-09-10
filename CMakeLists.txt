@@ -2,11 +2,20 @@ cmake_minimum_required(VERSION 3.16)
 
 project(chat)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(SOCI CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)
+
+find_package(Qt5Core CONFIG REQUIRED)
+find_package(Qt5Gui CONFIG REQUIRED)
+find_package(Qt5Widgets CONFIG REQUIRED)
+
 add_subdirectory(logger)
 add_subdirectory(chat-grpc-submodule)
 add_subdirectory(crypto)
@@ -36,22 +45,22 @@ target_link_libraries(chat-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_a
 #------------------#Client CONSOLE application
 add_executable(chat-client-console chat-net-client.cpp gui.h gui.cpp)
 target_link_libraries(chat-client-console PRIVATE chat-client gRPC::grpc gRPC::grpc++)
-#------------------#Client GUI application
+#------------------#Client GUI application-----WX
 add_executable(chat-client-wx "wxauthorized.cpp" "wxchat.cpp" "wxchatlist.cpp" "wxinitial.cpp" "wxsearchusers.cpp" "wxsignin.cpp" "wxsignup.cpp")
 target_link_libraries(chat-client-wx PRIVATE wx::core wx::base chat-client)
+
+
+#------------------#Client GUI application-----QT
+add_executable(chat-client-qt qtmain.cpp qtmainwindow.h qtmainwindow.cpp qtsignin.h qtsignin.cpp qtsignup.h qtsignup.cpp qtauthorized.h qtauthorized.cpp)
+target_link_libraries(chat-client-qt PRIVATE chat-client gRPC::grpc++ Qt5::Core Qt5::Gui Qt5::Widgets)
+
 if(WIN32)
     # Windows specific
     set_target_properties(chat-client-wx PROPERTIES WIN32_EXECUTABLE TRUE)
+    set_target_properties(chat-client-qt PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 if(WIN32)
     # Windows specific
     set_target_properties(chat-server-wx PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 # Add additional CPack settings as needed
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-add_executable(chat-client-qt qtmain.cpp qtmainwindow.h qtmainwindow.cpp qtsignin.h qtsignin.cpp qtsignup.h qtsignup.cpp qtauthorized.h qtauthorized.cpp)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)

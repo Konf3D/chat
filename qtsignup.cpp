@@ -2,7 +2,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QCloseEvent>
-#include "signup.h"
+#include "qtsignup.h"
 
 SignUpWindow::SignUpWindow(QWidget* parent, std::shared_ptr<ChatClient> cc)
     : QWidget(parent), cc(cc)

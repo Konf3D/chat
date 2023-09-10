@@ -1,4 +1,4 @@
-#include "authorized.h"
+#include "qtauthorized.h"
 
 AuthorizedWindow::AuthorizedWindow(QWidget* parent, std::shared_ptr<ChatClient> cc)
     : QWidget(parent), tableWidget(nullptr), chatDetailsFrame(nullptr), chatTextEdit(nullptr),cc(cc)

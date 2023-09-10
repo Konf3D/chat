@@ -2,11 +2,10 @@
 #define SIGNUP_H
 
 #include <QWidget>
-#include "mainwindow.h"
+#include "qtmainwindow.h"
 class SignUpWindow : public QWidget
 {
     Q_OBJECT
-
 public:
     SignUpWindow(QWidget* parent = nullptr, std::shared_ptr<ChatClient> cc = nullptr);
 

@@ -6,7 +6,8 @@
 #include <QPushButton>
 #include <QVector>
 #include <QSharedPointer>
-#include "chat/client.h"
+#include "client.h"
+
 class SignInWindow;
 class SignUpWindow;
 class AuthorizedWindow;
@@ -14,7 +15,6 @@ class ChatClient;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     MainWindow();
 private slots:

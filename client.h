@@ -1,6 +1,5 @@
 
 #pragma once
-#include <grpc++/grpc++.h>
 #include <fstream>
 #include <vector>
 #include "server.h"

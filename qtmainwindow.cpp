@@ -1,7 +1,7 @@
-#include "mainwindow.h"
-#include "signup.h"
-#include "signin.h"
-#include "authorized.h"
+#include "qtmainwindow.h"
+#include "qtsignup.h"
+#include "qtsignin.h"
+#include "qtauthorized.h"
 
 MainWindow::MainWindow()
     :currentChild(nullptr)

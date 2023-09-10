@@ -12,12 +12,10 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QSplitter>
-#include "mainwindow.h"
+#include "qtmainwindow.h"
 
 class AuthorizedWindow : public QWidget
 {
-    Q_OBJECT
-
 public:
     AuthorizedWindow(QWidget *parent = nullptr, std::shared_ptr<ChatClient> cc = nullptr);
     ~AuthorizedWindow();
