@@ -16,7 +16,7 @@ ChatWindow::ChatWindow(const wxString& title, const wxString& chatName, Authoriz
     for (auto& data : d)
     {
 
-        chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", data.date(), data.sender(), data.content()));
+        chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", data.time, data.sender, data.content));
     }
     messageEntry = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxTE_PROCESS_ENTER);
@@ -48,7 +48,7 @@ std::string ChatWindow::GetTimestamp() {
 
 void ChatWindow::OnSendMessage(wxCommandEvent& event) {
     if (!messageEntry->GetValue().IsEmpty()) {
-        if(cc->Message(myself, other, messageEntry->GetValue().ToStdString()))
+        if(cc->Send(myself, other, messageEntry->GetValue().ToStdString()))
         chatBox->AppendText(wxString::Format("%s %s: \"%s\"\n", GetTimestamp(), myself, messageEntry->GetValue().ToStdString()));
         else
             wxMessageBox("Failed to send message", "Info", wxOK | wxICON_INFORMATION);

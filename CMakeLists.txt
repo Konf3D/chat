@@ -26,13 +26,15 @@ add_executable(chat-server-gui  adminpanel.cpp)
 target_link_libraries(chat-server-gui PRIVATE chat-server chat-client wx::core wx::base gRPC::grpc++)
 
 #------------------#Client library
-add_library(chat-client crypto.h crypto.cpp server.h client.cpp gui.cpp)
+add_library(chat-client server.h client.h client.cpp)
 target_link_libraries(chat-client PRIVATE logging)
 target_link_libraries(chat-client PRIVATE proto-objects)
+target_link_libraries(chat-client PRIVATE mylibsql)
+target_link_libraries(chat-client PRIVATE mycrypto)
 target_link_libraries(chat-client PRIVATE gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 
 #------------------#Client CONSOLE application
-add_executable(chat-client-console chat-net-client.cpp)
+add_executable(chat-client-console chat-net-client.cpp gui.h gui.cpp)
 target_link_libraries(chat-client-console PRIVATE chat-client gRPC::grpc gRPC::grpc++)
 #------------------#Client GUI application
 add_executable(chat-client-gui authorized.cpp chat.cpp chatlist.cpp initial.cpp searchusers.cpp signin.cpp signup.cpp)

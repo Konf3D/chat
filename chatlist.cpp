@@ -11,16 +11,16 @@ ChatListWindow::ChatListWindow(const wxString& title, AuthorizedWindow* parent)
     chatList->InsertColumn(0, "Name");
     chatList->InsertColumn(1, "Last Message");
     chatList->InsertColumn(2, "Timestamp"); // New column for timestamp
-    msgs = std::make_shared<std::vector<chat::Message>>(cc->RetrieveMessageStream());
+    msgs = std::make_shared<std::vector<Message>>(cc->RetrieveMessageStream());
     std::unordered_map<std::string, Message> preview;
     for (auto& data : *msgs)
     {
-        std::string previewUser = data.sender() == cc->getUser() ? data.sender() : data.receiver();
+        std::string previewUser = data.sender == cc->getUser() ? data.sender : data.receiver;
         Message msg;
-        msg.content = data.content();
-        msg.sender = data.sender();
-        msg.receiver = data.receiver();
-        msg.time = data.date();
+        msg.content = data.content;
+        msg.sender = data.sender;
+        msg.receiver = data.receiver;
+        msg.time = data.time;
         preview.insert(std::make_pair(previewUser, msg));
     }
     // Set column widths

@@ -127,7 +127,7 @@ public:
 
 private:
     std::shared_ptr<ChatClient> cc;
-    std::shared_ptr<std::vector<chat::Message>> msgs;
+    std::shared_ptr<std::vector<Message>> msgs;
     std::string myself,other;
     //Member objects
     AuthorizedWindow* parent;
@@ -177,7 +177,7 @@ public:
     std::shared_ptr<ChatClient> getClient();
 private:
     std::shared_ptr<ChatClient> cc;
-    std::shared_ptr<std::vector<chat::Message>> msgs;
+    std::shared_ptr<std::vector<Message>> msgs;
     //Member objects
     wxListCtrl* chatList;
     wxButton* blockButton;

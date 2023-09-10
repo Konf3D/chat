@@ -111,7 +111,7 @@ void ChatGUI::logged()
         std::cout << "Enter the reciever's username:";
         std::string reciever;
         std::getline(std::cin, reciever);
-        client_.Message(user_, reciever, message);
+        client_.Send(user_, reciever, message);
         client_.RetrieveMessageStream();
         break;
     }

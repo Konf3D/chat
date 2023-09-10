@@ -7,7 +7,9 @@
 #include <grpc++/grpc++.h>
 #include "client.h"
 #include "server.h"
-#include "crypto.h"
+#include "crypto/crypto.h"
+#include "sql/sqlconnection.h"
+
 constexpr auto grpcErrorLogFile = "grpc-client.log";
 ChatClient::ChatClient(std::shared_ptr<grpc::Channel> channel)
     : stub_(chat::ChatService::NewStub(channel))
@@ -74,7 +76,7 @@ bool ChatClient::Authenticate(const std::string& username, const std::string& pa
     }
 }
 
-bool ChatClient::Message(const std::string& sender, const std::string& receiver, const std::string& content)
+bool ChatClient::Send(const std::string& sender, const std::string& receiver, const std::string& content)
 {
     chat::Message message;
     message.set_sender(sender);
@@ -129,7 +131,7 @@ bool ChatClient::Adduser(const std::string& user)
     return true;
 }
 
-std::vector<chat::Message> ChatClient::RetrieveMessageStream()
+std::vector<Message> ChatClient::RetrieveMessageStream()
 {
     //std::string username = user_;
     chat::Token token;
@@ -138,11 +140,11 @@ std::vector<chat::Message> ChatClient::RetrieveMessageStream()
     std::unique_ptr<grpc::ClientReader<chat::Message>> reader(stub_->GetMessageStream(&context, token));
 
     chat::Message message;
-    std::vector<chat::Message> msgs;
+    std::vector<Message> msgs;
     std::ofstream messagesDBFile(dbMessagesFileName);
     while (reader->Read(&message)) {
         messagesDBFile << message.sender() << '\n' << message.receiver() << '\n' << message.content() << '\n';
-        msgs.push_back(message);
+        msgs.push_back({ message.sender(),message.receiver(),message.content(),message.date() });
     }
 
     grpc::Status status = reader->Finish();

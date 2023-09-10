@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include "server.h"
+#include "sql/sqlconnection.h"
 constexpr auto dbMessagesFileName = "usermessages.db";
 enum class UserType
 {
@@ -12,6 +13,7 @@ enum class UserType
 	Banned = 2,
 	Friend = 3
 };
+class Message;
 class ChatClient
 {
 public:
@@ -19,10 +21,10 @@ public:
 	ChatClient();
 	bool Register(const std::string& email, const std::string& username, const std::string& password);
 	bool Authenticate(const std::string& username, const std::string& password);
-	bool Message(const std::string& sender, const std::string& receiver, const std::string& content);
+	bool Send(const std::string& sender, const std::string& receiver, const std::string& content);
 	bool BlockUser(const std::string& user);
 	bool Adduser(const std::string & user);
-	std::vector<chat::Message> RetrieveMessageStream();
+	std::vector<Message> RetrieveMessageStream();
 	std::vector<std::string> RetrieveUserList(const UserType type = UserType::User);
 	std::string getUser();
 private:
