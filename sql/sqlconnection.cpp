@@ -271,7 +271,7 @@ bool UserRepository::getUserBannedList(const std::string& userLogin, std::shared
     catch (const std::exception& e)
     {
         // Handle any exceptions thrown during the queries
-        std::cerr << "Error retrieving user's friend list: " << e.what() << std::endl;
+        std::cerr << "Error retrieving user's banned list: " << e.what() << std::endl;
         return false; // Query failed
     }
 }
@@ -292,7 +292,7 @@ bool UserRepository::getUserList(std::vector<std::string>& response)
     catch (const std::exception& e)
     {
         // Handle any exceptions thrown during the queries
-        std::cerr << "Error retrieving user's friend list: " << e.what() << std::endl;
+        std::cerr << "Error retrieving user's list: " << e.what() << std::endl;
         return false; // Query failed
     }
 }
@@ -477,7 +477,7 @@ bool MessageRepository::getMessagesByUser(const std::string& userLogin, std::sha
     try
     {
         soci::rowset<soci::row> rs = ((*connection).prepare <<
-            "SELECT sender, receiver, message, timestamp FROM message WHERE sender = :login OR receiver = :login ",
+            "SELECT * FROM message WHERE sender = :login OR receiver = :login ",
             soci::use(userLogin));
 
         // Fetch the rows and populate the messages vector
@@ -485,10 +485,10 @@ bool MessageRepository::getMessagesByUser(const std::string& userLogin, std::sha
         for (soci::rowset<soci::row>::const_iterator it = rs.begin(); it != rs.end(); ++it)
         {
             soci::row const& row = *it;
-            message.sender = row.get<std::string>(0);
-            message.receiver = row.get<std::string>(1);
-            message.content = row.get<std::string>(2);
-            message.time = row.get<std::string>(3);
+            message.sender = row.get<std::string>(1);
+            message.receiver = row.get<std::string>(2);
+            message.content = row.get<std::string>(3);
+            message.time = row.get<std::string>(4);
             response->push_back(message);
         }
 
