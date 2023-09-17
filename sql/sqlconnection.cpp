@@ -253,18 +253,16 @@ bool UserRepository::getUserBannedList(const std::string& userLogin, std::shared
         soci::rowset<soci::row> rs2 = ((*connection).prepare <<
             "SELECT user2 FROM bannedlist WHERE user1 = :login",
             soci::use(userLogin));
-        std::unordered_set<std::string> set;
         for (soci::rowset<soci::row>::const_iterator it = rs1.begin(); it != rs1.end(); ++it)
         {
             soci::row const& row = *it;
-            set.insert(row.get<std::string>(0));
+            response->insert(row.get<std::string>(0));
         }
         for (soci::rowset<soci::row>::const_iterator it = rs2.begin(); it != rs2.end(); ++it)
         {
             soci::row const& row = *it;
-            set.insert(row.get<std::string>(0));
+            response->insert(row.get<std::string>(0));
         }
-        response = std::make_unique<std::unordered_set<std::string>>(set);
         // Check if any friends were retrieved
         return true;
     }
