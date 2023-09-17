@@ -48,6 +48,8 @@ public:
     bool addFriend(const std::string& user1, const std::string& user2);
     bool addBlock(const std::string& user1, const std::string& user2);
     bool addUserBan(const std::string& login);
+    bool removeBlock(const std::string& user1, const std::string& user2);
+    bool removeBan(const std::string& login);
 public:
     UserRepository(std::shared_ptr<soci::session> conn);
 };

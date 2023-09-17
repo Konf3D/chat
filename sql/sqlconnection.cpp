@@ -1,5 +1,7 @@
 #include "sqlconnection.h"
 #include "sqlconnection.h"
+#include "sqlconnection.h"
+#include "sqlconnection.h"
 #include <memory>
 SqlConnection::SqlConnection(const std::string& databaseFile) : sql(std::make_shared<soci::session>(soci::sqlite3, databaseFile))
 {
@@ -313,6 +315,53 @@ bool UserRepository::addUserBan(const std::string& login)
     {
         // Handle any exceptions thrown during the update
         std::cerr << "Error banning user: " << e.what() << std::endl;
+        return false;
+    }
+}
+bool UserRepository::removeBlock(const std::string& user1, const std::string& user2)
+{
+    try
+    {
+        // Begin a transaction
+        soci::transaction tr(*connection);
+
+        // Insert the new friend pair into the "friendlist" table
+        *connection << "DELETE FROM bannedlist WHERE user1 = :user1 AND user2 = :user2",
+            soci::use(user1),
+            soci::use(user2);
+
+        // Commit the transaction
+        tr.commit();
+
+        std::cout << "Users blocked successfully." << std::endl;
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        // Handle any exceptions thrown during the insertion
+        std::cerr << "Error blocking users: " << e.what() << std::endl;
+        return false;
+    }
+}
+bool UserRepository::removeBan(const std::string& login)
+{
+    try
+    {
+        // Begin a transaction
+        soci::transaction tr(*connection);
+
+        // Update the status column for the specified user login
+        *connection << "UPDATE user SET status = 'active' WHERE login = :login",
+            soci::use(login);
+
+        // Commit the transaction
+        tr.commit();
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        // Handle any exceptions thrown during the update
+        std::cerr << "Error removing ban: " << e.what() << std::endl;
         return false;
     }
 }
