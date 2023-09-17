@@ -182,6 +182,7 @@ ChatServer::ChatServer()
 {
 	auto senderUsernameTokenMeta = context->client_metadata().begin();
 	std::string user1;
+	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
 	if (!chatDatabase.getLoginByToken(std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end()), user1))
 	{
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "User access token invalid");
@@ -189,9 +190,9 @@ ChatServer::ChatServer()
 	if (user1 == "localhost-admin")
 	{
 		auto userlist = chatDatabase.addUserBan(request->message());
+		chatDatabase.addBlock(user1, request->message());
 		return grpc::Status::OK;
 	}
-	std::string user2 = std::string(senderUsernameTokenMeta->second.begin(), senderUsernameTokenMeta->second.end());
 	if (!chatDatabase.addBlock(user1, user2))
 	{
 		return grpc::Status(grpc::StatusCode::UNKNOWN, "Server Failed");
