@@ -399,3 +399,5 @@ FodyWeavers.xsd
 /out/build/x64-Debug
 /out/build/linux
 /out/var/cache/fontconfig
+
+build
