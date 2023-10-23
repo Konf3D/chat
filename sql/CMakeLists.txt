@@ -10,11 +10,7 @@ target_link_libraries(mylibsql PRIVATE unofficial::sqlite3::sqlite3)
 if(WIN32)
     target_link_libraries(mylibsql PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
 elseif(UNIX)
-    target_link_libraries(mylibsql PRIVATE SOCI::soci_core_static SOCI::soci_empty_static SOCI::soci_sqlite3_static)
-    target_link_libraries(mylibsql PRIVATE
-    soci_core
-    soci_sqlite3
-)
+    target_link_libraries(mylibsql PRIVATE SOCI::soci_core_static SOCI::soci_sqlite3_static)
 endif()
 set_target_properties(mylibsql PROPERTIES
     CXX_STANDARD 14  # Set your desired C++ standard here
